@@ -4,8 +4,14 @@
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
 HoshioEngine/thirdParty/Vulkan
-HoshioEngine/thirdParty/Vulkan/lib/
 *.lib
+*.dll
+*.sln
+*.vcxproj
+*.filters
+*.user
+*.ini
+*.props
 
 # User-specific files
 *.rsuser
