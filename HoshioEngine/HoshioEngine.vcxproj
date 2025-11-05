@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{53de162c-4875-4e43-8006-a09b1022bfff}</ProjectGuid>
+    <RootNamespace>HoshioEngine</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="mPropertySheet.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="mPropertySheet.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="mPropertySheet.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="mPropertySheet.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)$(Platform)\$(ProjectName)_$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)$(Platform)\bin\$(ProjectName)_$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)$(Platform)\$(ProjectName)_$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)$(Platform)\bin\$(ProjectName)_$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(ProjectDir)src\include;$(ProjectDir)thirdParty;$(ProjectDir)thirdParty\Vulkan\include;$(ProjectDir);$(Shorekeeper)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(ProjectDir)thirdParty\Vulkan\lib;$(ProjectDir)thirdParty\assimp;$(Shorekeeper)libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>assimp-vc142-mtd.lib;vulkan-1.lib;glfw3.lib;python312.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(ProjectDir)src\include;$(ProjectDir)thirdParty;$(ProjectDir)thirdParty\Vulkan\include;$(ProjectDir);$(Shorekeeper)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(ProjectDir)thirdParty\Vulkan\lib;$(ProjectDir)thirdParty\assimp;$(Shorekeeper)libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>assimp-vc142-mtd.lib;vulkan-1.lib;glfw3.lib;python312.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="src\include\Base\CommandManager.h" />
+    <ClInclude Include="src\include\Base\DescriptorManager.h" />
+    <ClInclude Include="src\include\Base\MemoryManager.h" />
+    <ClInclude Include="src\include\Base\PipelineManager.h" />
+    <ClInclude Include="src\include\Base\QueryPoolManager.h" />
+    <ClInclude Include="src\include\Base\RpwfManager.h" />
+    <ClInclude Include="src\include\Base\SamplerManager.h" />
+    <ClInclude Include="src\include\Base\SyncManager.h" />
+    <ClInclude Include="src\include\Base\VulkanBase.h" />
+    <ClInclude Include="src\include\Engine\Object\Camera.h" />
+    <ClInclude Include="src\include\Engine\Object\Mesh.h" />
+    <ClInclude Include="src\include\Engine\Object\Model.h" />
+    <ClInclude Include="src\include\Engine\Object\Object.h" />
+    <ClInclude Include="src\include\Engine\Object\Vertex.h" />
+    <ClInclude Include="src\include\Engine\Panel\Editor\EditorGUIManager.h" />
+    <ClInclude Include="src\include\Engine\Panel\Editor\EditorInspectorPanel.h" />
+    <ClInclude Include="src\include\Engine\Panel\Editor\EditorPanel.h" />
+    <ClInclude Include="src\include\Engine\Panel\PanelManager.h" />
+    <ClInclude Include="src\include\Engine\ShaderEditor\PipelineNode\DrawScreenNode.h" />
+    <ClInclude Include="src\include\Engine\ShaderEditor\PipelineNode\PipelineNode.h" />
+    <ClInclude Include="src\include\Engine\ShaderEditor\Shader.h" />
+    <ClInclude Include="src\include\Plus\BufferManager.h" />
+    <ClInclude Include="src\include\Plus\ImageManager.h" />
+    <ClInclude Include="src\include\Plus\VulkanPlus.h" />
+    <ClInclude Include="src\include\Utils\CommonUtils.h" />
+    <ClInclude Include="src\include\Utils\ImageUtils.h" />
+    <ClInclude Include="src\include\VulkanCommon.h" />
+    <ClInclude Include="src\include\Wins\GlfwManager.h" />
+    <ClInclude Include="test\SimplePathTrace\SimplePathTrace.h" />
+    <ClInclude Include="test\Test3D\Test3D.h" />
+    <ClInclude Include="test\TestCurve\CurvePanel.h" />
+    <ClInclude Include="test\TestCurve\RbfNetwork.h" />
+    <ClInclude Include="test\TestModel\TestModel.h" />
+    <ClInclude Include="thirdParty\imgui\imconfig.h" />
+    <ClInclude Include="thirdParty\imgui\imgui.h" />
+    <ClInclude Include="thirdParty\imgui\imgui_impl_glfw.h" />
+    <ClInclude Include="thirdParty\imgui\imgui_impl_vulkan.h" />
+    <ClInclude Include="thirdParty\imgui\imgui_internal.h" />
+    <ClInclude Include="thirdParty\imgui\imstb_rectpack.h" />
+    <ClInclude Include="thirdParty\imgui\imstb_textedit.h" />
+    <ClInclude Include="thirdParty\imgui\imstb_truetype.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="src\lib\Base\CommandManager.cpp" />
+    <ClCompile Include="src\lib\Base\DescriptorManager.cpp" />
+    <ClCompile Include="src\lib\Base\MemoryManager.cpp" />
+    <ClCompile Include="src\lib\Base\PipelineManager.cpp" />
+    <ClCompile Include="src\lib\Base\QueryPoolManager.cpp" />
+    <ClCompile Include="src\lib\Base\RpwfManager.cpp" />
+    <ClCompile Include="src\lib\Base\SamplerManager.cpp" />
+    <ClCompile Include="src\lib\Base\SyncManager.cpp" />
+    <ClCompile Include="src\lib\Base\VulkanBase.cpp" />
+    <ClCompile Include="src\lib\Engine\Object\Camera.cpp" />
+    <ClCompile Include="src\lib\Engine\Object\Mesh.cpp" />
+    <ClCompile Include="src\lib\Engine\Object\Model.cpp" />
+    <ClCompile Include="src\lib\Engine\Object\Object.cpp" />
+    <ClCompile Include="src\lib\Engine\Object\Vertex.cpp" />
+    <ClCompile Include="src\lib\Engine\Panel\Editor\EditorGUIManager.cpp" />
+    <ClCompile Include="src\lib\Engine\Panel\Editor\EditorInspectorPanel.cpp" />
+    <ClCompile Include="src\lib\Engine\Panel\Editor\EditorPanel.cpp" />
+    <ClCompile Include="src\lib\Engine\Panel\PanelManager.cpp" />
+    <ClCompile Include="src\lib\Engine\ShaderEditor\PipelineNode\DrawScreenNode.cpp" />
+    <ClCompile Include="src\lib\Engine\ShaderEditor\PipelineNode\PipelineNode.cpp" />
+    <ClCompile Include="src\lib\Engine\ShaderEditor\Shader.cpp" />
+    <ClCompile Include="src\lib\Plus\BufferManager.cpp" />
+    <ClCompile Include="src\lib\Plus\ImageManager.cpp" />
+    <ClCompile Include="src\lib\Plus\VulkanPlus.cpp" />
+    <ClCompile Include="src\lib\Utils\CommonUtils.cpp" />
+    <ClCompile Include="src\lib\Utils\ImageUtils.cpp" />
+    <ClCompile Include="src\lib\Wins\GlfwManager.cpp" />
+    <ClCompile Include="test\SimplePathTrace\SimplePathTrace.cpp" />
+    <ClCompile Include="test\Test3D\Test3D.cpp" />
+    <ClCompile Include="test\TestCurve\CurvePanel.cpp" />
+    <ClCompile Include="test\TestCurve\RbfNetwork.cpp" />
+    <ClCompile Include="test\TestModel\TestModel.cpp" />
+    <ClCompile Include="thirdParty\imgui\imgui.cpp" />
+    <ClCompile Include="thirdParty\imgui\imgui_demo.cpp" />
+    <ClCompile Include="thirdParty\imgui\imgui_draw.cpp" />
+    <ClCompile Include="thirdParty\imgui\imgui_impl_glfw.cpp" />
+    <ClCompile Include="thirdParty\imgui\imgui_impl_vulkan.cpp" />
+    <ClCompile Include="thirdParty\imgui\imgui_tables.cpp" />
+    <ClCompile Include="thirdParty\imgui\imgui_widgets.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
