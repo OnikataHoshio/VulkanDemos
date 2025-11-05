@@ -1,11 +1,11 @@
 #ifndef _TEST_MODEL_H_
 #define _TEST_MODEL_H_
 
-#include "Engine/ShaderEditor/PipelineNode/PipelineNode.h"
+#include "Engine/ShaderEditor/RenderGraph/RenderNode.h"
 #include "Engine/Object/Model.h"
 
 namespace HoshioEngine {
-	class TestModel : public PipelineNode {
+	class TestModel : public RenderNode {
 	private:
 		Model model;
 		ShaderInfo shader_info;

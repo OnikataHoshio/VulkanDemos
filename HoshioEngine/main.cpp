@@ -1,7 +1,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "Wins/GlfwManager.h"
 
-#include "Engine/ShaderEditor/PipelineNode/DrawScreenNode.h"
+#include "Engine/ShaderEditor/RenderGraph/DrawScreenNode.h"
 #include "Engine/Panel/Editor/EditorGUIManager.h"
 #include "Engine/Panel/Editor/EditorInspectorPanel.h"
 #include "test/SimplePathTrace/SimplePathTrace.h"
@@ -29,24 +29,24 @@ int main() {
 		Sampler& sampler_linear = VulkanPlus::Plus().CreateSampler("sampler_linear", Sampler::SamplerCreateInfo()).second[0];
 
 		TimestampQueries timestampQueries(7);
-		PipelineNode::pTimestampQueries = &timestampQueries;
+		RenderNode::pTimestampQueries = &timestampQueries;
 		
 		const CommandBuffer& commandBuffer = VulkanPlus::Plus().CommandBuffer_Graphics();
 
 		{
-			std::unique_ptr<PipelineNode> drawScreenNode =
+			std::unique_ptr<RenderNode> drawScreenNode =
 				std::make_unique<DrawScreenNode>(sampler_linear, bg);
 			drawScreenNode->Init();
 
-			//std::unique_ptr<PipelineNode> simplePathTrace =
+			//std::unique_ptr<RenderNode> simplePathTrace =
 			//	std::make_unique<SimplePathTrace>(sampler_linear, &texture);
 			//simplePathTrace->Init();
 
-			std::unique_ptr<PipelineNode> test3D =
+			std::unique_ptr<RenderNode> test3D =
 				std::make_unique<Test3D>(sampler_linear);
 			test3D->Init();
 
-			//std::unique_ptr<PipelineNode> test_model =
+			//std::unique_ptr<RenderNode> test_model =
 			//	std::make_unique<TestModel>("test/TestModel/Resource/Models/backpack/backpack.obj");
 			//test_model->Init();
 

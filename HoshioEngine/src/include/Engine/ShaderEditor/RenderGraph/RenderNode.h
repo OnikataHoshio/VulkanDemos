@@ -1,5 +1,5 @@
-#ifndef _PIPELINE_NODE_H_
-#define _PIPELINE_NODE_H_
+#ifndef _RENDER_NODE_H_
+#define _RENDER_NODE_H_
 
 #include "Base/CommandManager.h"
 #include "Base/PipelineManager.h"
@@ -18,9 +18,9 @@
 
 namespace HoshioEngine {
 
-	class PipelineNode {
+	class RenderNode {
 	protected:
-		PipelineNode* next = nullptr;
+		RenderNode* next = nullptr;
 
 		virtual void InitResource() = 0;
 		virtual void CreateSampler() = 0;
@@ -45,17 +45,17 @@ namespace HoshioEngine {
 
 		bool isFirstNode = false;
 
-		PipelineNode();
-		virtual ~PipelineNode() = default;
+		RenderNode();
+		virtual ~RenderNode() = default;
 		virtual void ImguiRender() = 0;
 
-		PipelineNode& Init();
-		PipelineNode& LinkNextNode(PipelineNode* node);
-		PipelineNode* NextNode();
+		RenderNode& Init();
+		RenderNode& LinkNextNode(RenderNode* node);
+		RenderNode* NextNode();
 		void Render();
 	};
 }
 
 
-#endif // !_PIPELINE_NODE_H_
+#endif 
 

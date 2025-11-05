@@ -1,12 +1,12 @@
 #ifndef _DRAW_SCREEN_NODE_H_
 #define _DRAW_SCREEN_NODE_H_
 
-#include "Engine/ShaderEditor/PipelineNode/PipelineNode.h"
+#include "Engine/ShaderEditor/RenderGraph/RenderNode.h"
 
 namespace HoshioEngine {
 	
 
-	class DrawScreenNode : public PipelineNode {
+	class DrawScreenNode : public RenderNode {
 	public:
 
 	private:
@@ -59,7 +59,7 @@ namespace HoshioEngine {
 
 		void SetSampledImage(Texture2D* texture);
 
-		// 通过 PipelineNode 继承
+		// 通过 RenderNode 继承
 		void ImguiRender() override;
 
 

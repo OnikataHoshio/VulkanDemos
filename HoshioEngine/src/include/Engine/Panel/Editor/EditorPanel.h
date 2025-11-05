@@ -1,7 +1,7 @@
 #ifndef _EDITOR_PANEL_H_
 #define _EDITOR_PANEL_H_
 
-#include "Engine/ShaderEditor/PipelineNode/PipelineNode.h"
+#include "Engine/ShaderEditor/RenderGraph/RenderNode.h"
 
 namespace HoshioEngine {
 	class EditorPanel {

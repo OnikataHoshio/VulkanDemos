@@ -5,12 +5,12 @@
 namespace HoshioEngine {
 	class EditorInspectorPanel : public EditorPanel {
 	private:
-		PipelineNode* startNode = nullptr;
+		RenderNode* startNode = nullptr;
 	public:
 		static int mode;
 
 		EditorInspectorPanel() = default;
-		EditorInspectorPanel(PipelineNode* startNode);
+		EditorInspectorPanel(RenderNode* startNode);
 		~EditorInspectorPanel() = default;
 
 		void Render() override;

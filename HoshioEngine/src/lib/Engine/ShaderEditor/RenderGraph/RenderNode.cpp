@@ -1,17 +1,17 @@
-#include "Engine/ShaderEditor/PipelineNode/PipelineNode.h"
+#include "Engine/ShaderEditor/RenderGraph/RenderNode.h"
 
 namespace HoshioEngine {
-	TimestampQueries* PipelineNode::pTimestampQueries = nullptr;
+	TimestampQueries* RenderNode::pTimestampQueries = nullptr;
 
-	int PipelineNode::testCounter = 0;
+	int RenderNode::testCounter = 0;
 
-	bool PipelineNode::isTesting = false;
+	bool RenderNode::isTesting = false;
 
-	int PipelineNode::maxTestTimes = 1000;
+	int RenderNode::maxTestTimes = 1000;
 
-	uint32_t PipelineNode::timestampCounter = 0;
+	uint32_t RenderNode::timestampCounter = 0;
 
-	PipelineNode& PipelineNode::Init(){
+	RenderNode& RenderNode::Init(){
 		InitResource();
 		CreateSampler();
 		CreateRenderPass();
@@ -24,22 +24,22 @@ namespace HoshioEngine {
 		return *this;
 	}
 
-	PipelineNode::PipelineNode()
+	RenderNode::RenderNode()
 	{
 	}
 
-	PipelineNode* PipelineNode::NextNode()
+	RenderNode* RenderNode::NextNode()
 	{
 		return next;
 	}
 
-	PipelineNode& PipelineNode::LinkNextNode(PipelineNode* node)
+	RenderNode& RenderNode::LinkNextNode(RenderNode* node)
 	{
 		next = node;
 		return *node;
 	}
 
-	void PipelineNode::Render()
+	void RenderNode::Render()
 	{
 		const CommandBuffer& commandBuffer = VulkanPlus::Plus().CommandBuffer_Graphics();
 		if (isTesting) {

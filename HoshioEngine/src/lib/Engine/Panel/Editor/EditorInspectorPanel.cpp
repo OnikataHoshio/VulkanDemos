@@ -2,7 +2,7 @@
 
 namespace HoshioEngine {
 	int EditorInspectorPanel::mode = 0;
-	EditorInspectorPanel::EditorInspectorPanel(PipelineNode* startNode)
+	EditorInspectorPanel::EditorInspectorPanel(RenderNode* startNode)
 		:startNode(startNode)
 	{}
 

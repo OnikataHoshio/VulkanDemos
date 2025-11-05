@@ -1,5 +1,5 @@
 #include "Base/VulkanBase.h"
-#include "Engine/ShaderEditor/PipelineNode/PipelineNode.h"
+#include "Engine/ShaderEditor/RenderGraph/RenderNode.h"
 
 namespace HoshioEngine {
 

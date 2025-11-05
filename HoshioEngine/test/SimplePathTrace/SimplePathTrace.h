@@ -1,10 +1,10 @@
 #ifndef _SIMPLE_PATH_TRACE_H_
 #define _SIMPLE_PATH_TRACE_H_
 
-#include "Engine/ShaderEditor/PipelineNode/PipelineNode.h"
+#include "Engine/ShaderEditor/RenderGraph/RenderNode.h"
 
 namespace HoshioEngine {
-	class SimplePathTrace : public PipelineNode {
+	class SimplePathTrace : public RenderNode {
 	private:
 		Texture2D* texture = nullptr;
 
@@ -50,9 +50,6 @@ namespace HoshioEngine {
 		}u_Attribute;
 
 		SimplePathTrace(VkSampler sampler, Texture2D* texture);
-
-
-
 
 
 	};

@@ -1,11 +1,11 @@
 #ifndef _TEST_3D_H_
 #define _TEST_3D_H_
 
-#include "Engine/ShaderEditor/PipelineNode/PipelineNode.h"
+#include "Engine/ShaderEditor/RenderGraph/RenderNode.h"
 #include "Engine/Object/Camera.h"
 
 namespace HoshioEngine {
-	class Test3D : public PipelineNode{
+	class Test3D : public RenderNode{
 	private:
 		struct mVertex {
 			glm::vec3 position;
