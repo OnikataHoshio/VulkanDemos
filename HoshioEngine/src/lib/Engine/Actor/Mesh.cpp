@@ -1,4 +1,4 @@
-#include "Engine/Object/Mesh.h"
+#include "Engine/Actor/Mesh.h"
 #include "Wins/GlfwManager.h"
 
 namespace HoshioEngine {

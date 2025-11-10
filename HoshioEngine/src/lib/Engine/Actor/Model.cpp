@@ -1,4 +1,4 @@
-#include "Engine/Object/Model.h"
+#include "Engine/Actor/Model.h"
 
 namespace HoshioEngine {
 	Model::Model(const char* file_path)

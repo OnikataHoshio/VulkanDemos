@@ -1,7 +1,7 @@
 #ifndef _CAMERA_H_
 #define _CAMERA_H_
 
-#include "Object.h"
+#include "Actor.h"
 #include "Base\VulkanBase.h"
 
 namespace HoshioEngine {
@@ -15,7 +15,7 @@ namespace HoshioEngine {
 	};
 
 
-	class Camera : public Object {
+	class Camera : public Actor {
 	public:
 		glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 		glm::vec3 cameraUp;

@@ -165,25 +165,61 @@ namespace HoshioEngine {
 		static bool FormatIsSupported(VkFormat format);
 	};
 
+	class CubeAttachment : public Attachment{
+	public:
+		Attachment::ImageView;
+		Attachment::AddressOfImageView;
+		Attachment::DescriptorImageInfo;
+
+		uint32_t MipLevelCount() const;
+
+		CubeAttachment() = default;
+		CubeAttachment(VkFormat format, VkExtent2D extent, bool hasMipmap = true, 
+			VkSampleCountFlagBits sampleCount = VK_SAMPLE_COUNT_1_BIT, VkImageUsageFlags otherUsages = 0);
+
+		void Create(VkFormat format, VkExtent2D extent, bool hasMipmap = true, 
+			VkSampleCountFlagBits sampleCount = VK_SAMPLE_COUNT_1_BIT, VkImageUsageFlags otherUsages = 0);
+
+	private:
+		uint32_t mipLevelCount = 1;
+	};
+
+
 	class ImageManager {
 	private:
 		int m_texture2d_id = 0;
+		int m_texture_array_id = 0;
+		int m_texture_cube_id = 0;
 		int m_color_attachment_id = 0;
 		int m_depth_stencil_attachment_id = 0;
+		int m_cube_attachment_id = 0;
 
 		std::unordered_map<std::string, int> mTexture2DIDs;
 		std::unordered_map<int, Texture2D> mTexture2Ds;
+		std::unordered_map<std::string, int> mTextureArrayIDs;
+		std::unordered_map<int, TextureArray> mTextureArrays;
+		std::unordered_map<std::string, int> mTextureCubeIDs;
+		std::unordered_map<int, TextureCube> mTextureCubes;
+
 		std::unordered_map<std::string, int> mColorAttachmentIDs;
 		std::unordered_map<int, std::vector<ColorAttachment>> mColorAttachments;
 		std::unordered_map<std::string, int> mDepthStencilAttachmentIDs;
 		std::unordered_map<int, std::vector<DepthStencilAttachment>> mDepthStencilAttachments;
+		std::unordered_map<std::string, int> mCubeAttachmentIDs;
+		std::unordered_map<int, std::vector<CubeAttachment>> mCubeAttachments;
+
+
 
 		std::pair<int, std::span<Texture2D>> RecreateTexture2D(int id, const char* filePath, VkFormat initial_format, VkFormat final_format, bool generateMip = true);
 		std::pair<int, std::span<Texture2D>> RecreateTexture2D(int id, const uint8_t* pImageData, VkExtent2D extent, VkFormat initial_format, VkFormat final_format, bool generateMip = true);
+
 		std::pair<int, std::span<ColorAttachment>> RecreateColorAttachments(int id, uint32_t count, VkFormat format, VkExtent2D extent, bool hasMipmap = true, uint32_t layerCount = 1,
 			VkSampleCountFlagBits sampleCount = VK_SAMPLE_COUNT_1_BIT, VkImageUsageFlags otherUsages = 0);
 		std::pair<int, std::span<DepthStencilAttachment>> RecreateDepthStencilAttachments(int id, uint32_t count, VkFormat format, VkExtent2D extent, bool stencilOnly = false, uint32_t layerCount = 1,
 			VkSampleCountFlagBits sampleCount = VK_SAMPLE_COUNT_1_BIT, VkImageUsageFlags otherUsages = 0);
+		std::pair<int, std::span<CubeAttachment>> RecreateCubeAttachments(int id, uint32_t count, VkFormat format, VkExtent2D extent, bool hasMipmap = true,
+			VkSampleCountFlagBits sampleCount = VK_SAMPLE_COUNT_1_BIT, VkImageUsageFlags otherUsages = 0);
+
 	public:
 
 		std::pair<int, std::span<Texture2D>> CreateTexture2D(std::string name, const char* filePath, VkFormat initial_format, VkFormat final_format, bool generateMip = true);
@@ -194,6 +230,26 @@ namespace HoshioEngine {
 		bool HasTexture2D(int id);
 		size_t GetTexture2DCount() const;
 
+		std::pair<int, std::span<TextureArray>> CreateTextureArray(std::string name, const char* filepath, VkExtent2D extentInTiles, VkFormat format_initial, VkFormat format_final, bool generateMipmap = true);
+		std::pair<int, std::span<TextureArray>> CreateTextureArray(std::string name, const uint8_t* pImageData, VkExtent2D fullExtent, VkExtent2D extentInTiles, VkFormat format_initial, VkFormat format_final, bool generateMipmap = true);
+		std::pair<int, std::span<TextureArray>> CreateTextureArray(std::string name, ArrayRef<const char* const> filepaths, VkFormat format_initial, VkFormat format_final, bool generateMipmap = true);
+		std::pair<int, std::span<TextureArray>> CreateTextureArray(std::string name, ArrayRef<const uint8_t* const> psImageData, VkExtent2D extent, VkFormat format_initial, VkFormat format_final, bool generateMipmap = true);
+		std::pair<int, std::span<TextureArray>> GetTextureArray(std::string name);
+		std::pair<int, std::span<TextureArray>> GetTextureArray(int id);
+		bool HasTextureArray(std::string name);
+		bool HasTextureArray(int id);
+		size_t GetTextureArrayCount() const;
+
+
+		std::pair<int, std::span<TextureCube>> CreateTextureCube(std::string name, const char* filepath, const glm::uvec2 facePositions[6], VkFormat format_initial, VkFormat format_final, bool lookFromOutside = false, bool generateMipmap = true);
+		std::pair<int, std::span<TextureCube>> CreateTextureCube(std::string name, const uint8_t* pImageData, VkExtent2D fullExtent, const glm::uvec2 facePositions[6], VkFormat format_initial, VkFormat format_final, bool lookFromOutside = false, bool generateMipmap = true);
+		std::pair<int, std::span<TextureCube>> CreateTextureCube(std::string name, const char* const* filepaths, VkFormat format_initial, VkFormat format_final, bool lookFromOutside = false, bool generateMipmap = true);
+		std::pair<int, std::span<TextureCube>> CreateTextureCube(std::string name, const uint8_t* const* psImageData, VkExtent2D extent, VkFormat format_initial, VkFormat format_final, bool lookFromOutside = false, bool generateMipmap = true);
+		std::pair<int, std::span<TextureCube>> GetTextureCube(std::string name);
+		std::pair<int, std::span<TextureCube>> GetTextureCube(int id);
+		bool HasTextureCube(std::string name);
+		bool HasTextureCube(int id);
+		size_t GetTextureCubeCount() const;
 
 		std::pair<int, std::span<ColorAttachment>> CreateColorAttachments(std::string name, uint32_t count, VkFormat format, VkExtent2D extent, bool hasMipmap = true, uint32_t layerCount = 1,
 			VkSampleCountFlagBits sampleCount = VK_SAMPLE_COUNT_1_BIT, VkImageUsageFlags otherUsages = 0);
@@ -214,6 +270,17 @@ namespace HoshioEngine {
 		bool HasDepthStencilAttachments(std::string name);
 		bool HasDepthStencilAttachments(int id);
 		size_t GetDepthStencilAttachmentsCount() const;
+
+		std::pair<int, std::span<CubeAttachment>> CreateCubeAttachments(std::string name, uint32_t count, VkFormat format, VkExtent2D extent, bool hasMipmap = true, 
+			VkSampleCountFlagBits sampleCount = VK_SAMPLE_COUNT_1_BIT, VkImageUsageFlags otherUsages = 0);
+		std::pair<int, std::span<CubeAttachment>> GetCubeAttachments(std::string name);
+		std::pair<int, std::span<CubeAttachment>> GetCubeAttachments(int id);
+		int DestroyCubeAttachments(std::string name);
+		int DestroyCubeAttachments(int id);
+		bool HasCubeAttachments(std::string name);
+		bool HasCubeAttachments(int id);
+		size_t GetCubeAttachmentsCount() const;
+		
 
 
 	};

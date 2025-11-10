@@ -1,7 +1,7 @@
-#include "Engine/Object/Camera.h"
+#include "Engine/Actor/Camera.h"
 
 namespace HoshioEngine {
-	Camera::Camera(): Object(glm::vec3(5.0f, 5.0f, 5.0f), glm::vec3(-30.0f, -130.0f, 0.0f)),
+	Camera::Camera(): Actor(glm::vec3(5.0f, 5.0f, 5.0f), glm::vec3(-30.0f, -130.0f, 0.0f)),
 		zNear(0.1f),fovy(45.0f),cameraSpeed(10.f),mouseSensitivity(0.05f)
 	{
 		UpdateCameraData();

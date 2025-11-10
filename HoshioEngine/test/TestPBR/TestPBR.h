@@ -2,7 +2,7 @@
 #define _TEST_PBR_H_
 
 #include "Engine/ShaderEditor/RenderGraph/RenderNode.h"
-#include "Engine/Object/Model.h"
+#include "Engine/Actor/Model.h"
 
 using namespace HoshioEngine;
 

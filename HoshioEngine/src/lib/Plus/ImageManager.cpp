@@ -889,6 +889,49 @@ namespace HoshioEngine {
 
 #pragma endregion
 
+
+#pragma region CubeAttachment
+	uint32_t HoshioEngine::CubeAttachment::MipLevelCount() const
+	{
+		return mipLevelCount;
+	}
+
+	CubeAttachment::CubeAttachment(VkFormat format, VkExtent2D extent, bool hasMipmap, VkSampleCountFlagBits sampleCount, VkImageUsageFlags otherUsages)
+	{
+		Create(format, extent, hasMipmap, sampleCount, otherUsages);
+	}
+
+	void CubeAttachment::Create(VkFormat format, VkExtent2D extent, bool hasMipmap, VkSampleCountFlagBits sampleCount, VkImageUsageFlags otherUsages)
+	{
+		mipLevelCount = hasMipmap ? ImageUtils::CalculateMipLevelCount(extent) : 1;
+		VkImageCreateInfo imageCreateInfo = {
+			.flags = VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT,
+			.imageType = VK_IMAGE_TYPE_2D,
+			.format = format,
+			.extent = {extent.width, extent.height, 1},
+			.mipLevels = mipLevelCount,
+			.arrayLayers = 6,
+			.samples = sampleCount,
+			.tiling = VK_IMAGE_TILING_OPTIMAL,
+			.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | otherUsages,
+			.sharingMode = VK_SHARING_MODE_EXCLUSIVE,
+		};
+
+		imageMemory.Create(imageCreateInfo, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | bool(otherUsages & VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT) * VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT);
+
+		VkImageViewCreateInfo imageViewCreateInfo = {
+			.image = imageMemory.Image(),
+			.viewType = VK_IMAGE_VIEW_TYPE_2D_ARRAY,
+			.format = format,
+			.subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, mipLevelCount, 0 , 6}
+		};
+		imageView.Create(imageViewCreateInfo);
+	}
+#pragma endregion
+
+
+
+
 	std::pair<int, std::span<Texture2D>> ImageManager::RecreateTexture2D(int id, const char* filePath, VkFormat initial_format, VkFormat final_format, bool generateMip)
 	{
 		if (auto it = mTexture2Ds.find(id); it != mTexture2Ds.end()) {
@@ -947,10 +990,30 @@ namespace HoshioEngine {
 		return { M_INVALID_ID, {} };
 	}
 
+	std::pair<int, std::span<CubeAttachment>> ImageManager::RecreateCubeAttachments(int id, uint32_t count, VkFormat format, VkExtent2D extent, bool hasMipmap,  VkSampleCountFlagBits sampleCount, VkImageUsageFlags otherUsages)
+	{
+		if (count == 0) {
+			std::cerr << std::format("[ERROR] ImageManager: '{}' requested 0 CubeAttachments\n", id);
+			return { M_INVALID_ID, {} };
+		}
+
+		if (auto it = mCubeAttachments.find(id); it != mCubeAttachments.end()) {
+			it->second.clear();
+			it->second.resize(count);
+			for (size_t i = 0; i < it->second.size(); i++)
+				it->second[i].Create(format, extent, hasMipmap, sampleCount, otherUsages);
+			return { id, std::span<CubeAttachment>(it->second.data(), it->second.size()) };
+		}
+		std::cerr << std::format("[ERROR] ImageManager: CubeAttachments with id {} do not exist!\n", id);
+		return { M_INVALID_ID, {} };
+	}
+
 	std::pair<int, std::span<Texture2D>> ImageManager::CreateTexture2D(std::string name, const char* filePath, VkFormat initial_format, VkFormat final_format, bool generateMip)
 	{
-		if (auto it = mTexture2DIDs.find(name); it != mTexture2DIDs.end())
-			return RecreateTexture2D(it->second, filePath, initial_format, final_format, generateMip);
+		if (auto it = mTexture2DIDs.find(name); it != mTexture2DIDs.end()) {
+			std::cout << std::format("[ImageManager]::Warning::Texture({}) has been loaded!", name);
+			return GetTexture2D(name);
+		}
 
 		const int id = m_texture2d_id++;
 
@@ -974,8 +1037,10 @@ namespace HoshioEngine {
 
 	std::pair<int, std::span<Texture2D>> ImageManager::CreateTexture2D(std::string name, const uint8_t* pImageData, VkExtent2D extent, VkFormat initial_format, VkFormat final_format, bool generateMip)
 	{
-		if (auto it = mTexture2DIDs.find(name); it != mTexture2DIDs.end())
-			return RecreateTexture2D(it->second, pImageData, extent, initial_format, final_format, generateMip);
+		if (auto it = mTexture2DIDs.find(name); it != mTexture2DIDs.end()) {
+			std::cout << std::format("[ImageManager]::Warning::Texture({}) has been loaded!", name);
+			return GetTexture2D(name);
+		}
 
 		const int id = m_texture2d_id++;
 
@@ -1028,6 +1093,288 @@ namespace HoshioEngine {
 	size_t ImageManager::GetTexture2DCount() const
 	{
 		return mTexture2Ds.size();
+	}
+
+	std::pair<int, std::span<TextureArray>> ImageManager::CreateTextureArray(std::string name, const char* filepath, VkExtent2D extentInTiles, VkFormat format_initial, VkFormat format_final, bool generateMipmap)
+	{
+		if (auto it = mTextureArrayIDs.find(name); it != mTextureArrayIDs.end()) {
+			std::cout << std::format("[ImageManager]::Warning::TextureArray({}) has been loaded!", name);
+			return GetTextureArray(name);
+		}
+
+		const int id = m_texture_array_id++;
+
+		TextureArray texture(filepath, extentInTiles, format_initial, format_final, generateMipmap);
+		auto [it1, ok1] = mTextureArrays.emplace(id, std::move(texture));
+		if (!ok1) {
+			std::cerr << std::format("[ERROR] ImageManager: Emplace TextureArray for '{}' (id={}) failed\n", name, id);
+			return { M_INVALID_ID, {} };
+		}
+
+		auto [it2, ok2] = mTextureArrayIDs.emplace(name, id);
+		if (!ok2) {
+			std::cerr << std::format("[WARNING] ImagePassManager: TextureArray '{}' has not been recorded!\n", name);
+			mTextureArrays.erase(id);
+			return { M_INVALID_ID, {} };
+		}
+
+		auto& vec = it1->second;
+		return { id, std::span<TextureArray>(&vec, 1) };
+	}
+
+	std::pair<int, std::span<TextureArray>> ImageManager::CreateTextureArray(std::string name, const uint8_t* pImageData, VkExtent2D fullExtent, VkExtent2D extentInTiles, VkFormat format_initial, VkFormat format_final, bool generateMipmap)
+	{
+		if (auto it = mTextureArrayIDs.find(name); it != mTextureArrayIDs.end()) {
+			std::cout << std::format("[ImageManager]::Warning::TextureArray({}) has been loaded!", name);
+			return GetTextureArray(name);
+		}
+
+		const int id = m_texture_array_id++;
+
+		TextureArray texture(pImageData, fullExtent, extentInTiles, format_initial, format_final, generateMipmap);
+		auto [it1, ok1] = mTextureArrays.emplace(id, std::move(texture));
+		if (!ok1) {
+			std::cerr << std::format("[ERROR] ImageManager: Emplace TextureArray for '{}' (id={}) failed\n", name, id);
+			return { M_INVALID_ID, {} };
+		}
+
+		auto [it2, ok2] = mTextureArrayIDs.emplace(name, id);
+		if (!ok2) {
+			std::cerr << std::format("[WARNING] ImagePassManager: TextureArray '{}' has not been recorded!\n", name);
+			mTextureArrays.erase(id);
+			return { M_INVALID_ID, {} };
+		}
+
+		auto& vec = it1->second;
+		return { id, std::span<TextureArray>(&vec, 1) };
+	}
+
+	std::pair<int, std::span<TextureArray>> ImageManager::CreateTextureArray(std::string name, ArrayRef<const char* const> filepaths, VkFormat format_initial, VkFormat format_final, bool generateMipmap)
+	{
+		if (auto it = mTextureArrayIDs.find(name); it != mTextureArrayIDs.end()) {
+			std::cout << std::format("[ImageManager]::Warning::TextureArray({}) has been loaded!", name);
+			return GetTextureArray(name);
+		}
+
+		const int id = m_texture_array_id++;
+
+		TextureArray texture(filepaths, format_initial, format_final, generateMipmap);
+		auto [it1, ok1] = mTextureArrays.emplace(id, std::move(texture));
+		if (!ok1) {
+			std::cerr << std::format("[ERROR] ImageManager: Emplace TextureArray for '{}' (id={}) failed\n", name, id);
+			return { M_INVALID_ID, {} };
+		}
+
+		auto [it2, ok2] = mTextureArrayIDs.emplace(name, id);
+		if (!ok2) {
+			std::cerr << std::format("[WARNING] ImagePassManager: TextureArray '{}' has not been recorded!\n", name);
+			mTextureArrays.erase(id);
+			return { M_INVALID_ID, {} };
+		}
+
+		auto& vec = it1->second;
+		return { id, std::span<TextureArray>(&vec, 1) };
+	}
+
+	std::pair<int, std::span<TextureArray>> ImageManager::CreateTextureArray(std::string name, ArrayRef<const uint8_t* const> psImageData, VkExtent2D extent, VkFormat format_initial, VkFormat format_final, bool generateMipmap)
+	{
+		if (auto it = mTextureArrayIDs.find(name); it != mTextureArrayIDs.end()) {
+			std::cout << std::format("[ImageManager]::Warning::TextureArray({}) has been loaded!", name);
+			return GetTextureArray(name);
+		}
+
+		const int id = m_texture_array_id++;
+
+		TextureArray texture(psImageData, extent, format_initial, format_final, generateMipmap);
+		auto [it1, ok1] = mTextureArrays.emplace(id, std::move(texture));
+		if (!ok1) {
+			std::cerr << std::format("[ERROR] ImageManager: Emplace TextureArray for '{}' (id={}) failed\n", name, id);
+			return { M_INVALID_ID, {} };
+		}
+
+		auto [it2, ok2] = mTextureArrayIDs.emplace(name, id);
+		if (!ok2) {
+			std::cerr << std::format("[WARNING] ImagePassManager: TextureArray '{}' has not been recorded!\n", name);
+			mTextureArrays.erase(id);
+			return { M_INVALID_ID, {} };
+		}
+
+		auto& vec = it1->second;
+		return { id, std::span<TextureArray>(&vec, 1) };
+	}
+
+	std::pair<int, std::span<TextureArray>> ImageManager::GetTextureArray(std::string name)
+	{
+		if (auto it = mTextureArrayIDs.find(name); it != mTextureArrayIDs.end())
+			return GetTextureArray(it->second);
+		std::cerr << std::format("[ERROR] ImageManager: TextureArray with name '{}' do not exist!\n", name);
+		return { M_INVALID_ID, {} };
+	}
+
+	std::pair<int, std::span<TextureArray>> ImageManager::GetTextureArray(int id)
+	{
+		if (auto it = mTextureArrays.find(id); it != mTextureArrays.end())
+			return { id, std::span<TextureArray>(&it->second, 1) };
+		std::cerr << std::format("[ERROR] ImageManager: TextureArray with id {} do not exist!\n", id);
+		return { M_INVALID_ID, {} };
+	}
+
+	bool ImageManager::HasTextureArray(std::string name)
+	{
+		if (auto it = mTextureArrayIDs.find(name); it != mTextureArrayIDs.end())
+			return HasTexture2D(it->second);
+		return false;
+	}
+
+	bool ImageManager::HasTextureArray(int id)
+	{
+		return mTextureArrays.contains(id);
+	}
+
+	size_t ImageManager::GetTextureArrayCount() const
+	{
+		return mTextureArrays.size();
+	}
+
+	std::pair<int, std::span<TextureCube>> ImageManager::CreateTextureCube(std::string name, const char* filepath, const glm::uvec2 facePositions[6], VkFormat format_initial, VkFormat format_final, bool lookFromOutside, bool generateMipmap)
+	{
+		if (auto it = mTextureCubeIDs.find(name); it != mTextureCubeIDs.end()) {
+			std::cout << std::format("[ImageManager]::Warning::TextureCube({}) has been loaded!", name);
+			return GetTextureCube(name);
+		}
+
+		const int id = m_texture_cube_id++;
+
+		TextureCube texture(filepath, facePositions, format_initial, format_final, lookFromOutside, generateMipmap);
+		auto [it1, ok1] = mTextureCubes.emplace(id, std::move(texture));
+		if (!ok1) {
+			std::cerr << std::format("[ERROR] ImageManager: Emplace TextureCube for '{}' (id={}) failed\n", name, id);
+			return { M_INVALID_ID, {} };
+		}
+
+		auto [it2, ok2] = mTextureCubeIDs.emplace(name, id);
+		if (!ok2) {
+			std::cerr << std::format("[WARNING] ImagePassManager: TextureCube '{}' has not been recorded!\n", name);
+			mTextureCubes.erase(id);
+			return { M_INVALID_ID, {} };
+		}
+
+		auto& vec = it1->second;
+		return { id, std::span<TextureCube>(&vec, 1) };
+	}
+
+	std::pair<int, std::span<TextureCube>> ImageManager::CreateTextureCube(std::string name, const uint8_t* pImageData, VkExtent2D fullExtent, const glm::uvec2 facePositions[6], VkFormat format_initial, VkFormat format_final, bool lookFromOutside, bool generateMipmap)
+	{
+		if (auto it = mTextureCubeIDs.find(name); it != mTextureCubeIDs.end()) {
+			std::cout << std::format("[ImageManager]::Warning::TextureCube({}) has been loaded!", name);
+			return GetTextureCube(name);
+		}
+
+		const int id = m_texture_cube_id++;
+
+		TextureCube texture(pImageData, fullExtent, facePositions, format_initial, format_final, lookFromOutside, generateMipmap);
+		auto [it1, ok1] = mTextureCubes.emplace(id, std::move(texture));
+		if (!ok1) {
+			std::cerr << std::format("[ERROR] ImageManager: Emplace TextureCube for '{}' (id={}) failed\n", name, id);
+			return { M_INVALID_ID, {} };
+		}
+
+		auto [it2, ok2] = mTextureCubeIDs.emplace(name, id);
+		if (!ok2) {
+			std::cerr << std::format("[WARNING] ImagePassManager: TextureCube '{}' has not been recorded!\n", name);
+			mTextureCubes.erase(id);
+			return { M_INVALID_ID, {} };
+		}
+
+		auto& vec = it1->second;
+		return { id, std::span<TextureCube>(&vec, 1) };
+	}
+
+	std::pair<int, std::span<TextureCube>> ImageManager::CreateTextureCube(std::string name, const char* const* filepaths, VkFormat format_initial, VkFormat format_final, bool lookFromOutside, bool generateMipmap)
+	{
+		if (auto it = mTextureCubeIDs.find(name); it != mTextureCubeIDs.end()) {
+			std::cout << std::format("[ImageManager]::Warning::TextureCube({}) has been loaded!", name);
+			return GetTextureCube(name);
+		}
+
+		const int id = m_texture_cube_id++;
+
+		TextureCube texture(filepaths, format_initial, format_final, lookFromOutside, generateMipmap);
+		auto [it1, ok1] = mTextureCubes.emplace(id, std::move(texture));
+		if (!ok1) {
+			std::cerr << std::format("[ERROR] ImageManager: Emplace TextureCube for '{}' (id={}) failed\n", name, id);
+			return { M_INVALID_ID, {} };
+		}
+
+		auto [it2, ok2] = mTextureCubeIDs.emplace(name, id);
+		if (!ok2) {
+			std::cerr << std::format("[WARNING] ImagePassManager: TextureCube '{}' has not been recorded!\n", name);
+			mTextureCubes.erase(id);
+			return { M_INVALID_ID, {} };
+		}
+
+		auto& vec = it1->second;
+		return { id, std::span<TextureCube>(&vec, 1) };
+	}
+
+	std::pair<int, std::span<TextureCube>> ImageManager::CreateTextureCube(std::string name, const uint8_t* const* psImageData, VkExtent2D extent, VkFormat format_initial, VkFormat format_final, bool lookFromOutside, bool generateMipmap)
+	{
+		if (auto it = mTextureCubeIDs.find(name); it != mTextureCubeIDs.end()) {
+			std::cout << std::format("[ImageManager]::Warning::TextureCube({}) has been loaded!", name);
+			return GetTextureCube(name);
+		}
+
+		const int id = m_texture_cube_id++;
+
+		TextureCube texture(psImageData, extent, format_initial, format_final, lookFromOutside, generateMipmap);
+		auto [it1, ok1] = mTextureCubes.emplace(id, std::move(texture));
+		if (!ok1) {
+			std::cerr << std::format("[ERROR] ImageManager: Emplace TextureCube for '{}' (id={}) failed\n", name, id);
+			return { M_INVALID_ID, {} };
+		}
+
+		auto [it2, ok2] = mTextureCubeIDs.emplace(name, id);
+		if (!ok2) {
+			std::cerr << std::format("[WARNING] ImagePassManager: TextureCube '{}' has not been recorded!\n", name);
+			mTextureCubes.erase(id);
+			return { M_INVALID_ID, {} };
+		}
+
+		auto& vec = it1->second;
+		return { id, std::span<TextureCube>(&vec, 1) };
+	}
+
+	std::pair<int, std::span<TextureCube>> ImageManager::GetTextureCube(std::string name)
+	{
+		if (auto it = mTextureCubeIDs.find(name); it != mTextureCubeIDs.end())
+			return GetTextureCube(it->second);
+		std::cerr << std::format("[ERROR] ImageManager: TextureCube with name '{}' do not exist!\n", name);
+		return { M_INVALID_ID, {} };
+	}
+
+	std::pair<int, std::span<TextureCube>> ImageManager::GetTextureCube(int id)
+	{
+		if (auto it = mTextureCubes.find(id); it != mTextureCubes.end())
+			return { id, std::span<TextureCube>(&it->second, 1) };
+		std::cerr << std::format("[ERROR] ImageManager: TextureCube with id {} do not exist!\n", id);
+		return { M_INVALID_ID, {} };
+	}
+
+	bool ImageManager::HasTextureCube(std::string name)
+	{
+		if (auto it = mTextureCubeIDs.find(name); it != mTextureCubeIDs.end())
+			return HasTexture2D(it->second);
+		return false;
+	}
+
+	bool ImageManager::HasTextureCube(int id)
+	{
+		return mTextureCubes.contains(id);
+	}
+
+	size_t ImageManager::GetTextureCubeCount() const
+	{
+		return mTextureCubes.size();
 	}
 
 	std::pair<int, std::span<ColorAttachment>> ImageManager::CreateColorAttachments(std::string name, uint32_t count, VkFormat format, VkExtent2D extent, bool hasMipmap, uint32_t layerCount, VkSampleCountFlagBits sampleCount, VkImageUsageFlags otherUsages)
@@ -1197,5 +1544,90 @@ namespace HoshioEngine {
 	{
 		return mDepthStencilAttachments.size();;
 	}
+
+	std::pair<int, std::span<CubeAttachment>> ImageManager::CreateCubeAttachments(std::string name, uint32_t count, VkFormat format, VkExtent2D extent, bool hasMipmap, VkSampleCountFlagBits sampleCount, VkImageUsageFlags otherUsages)
+	{
+		if (auto it = mCubeAttachmentIDs.find(name); it != mCubeAttachmentIDs.end())
+			return RecreateCubeAttachments(it->second, count, format, extent, hasMipmap, sampleCount, otherUsages);
+
+		if (count == 0) {
+			std::cerr << std::format("[ERROR] ImageManager: '{}' requested 0 CubeAttachments\n", name);
+			return { M_INVALID_ID, {} };
+		}
+
+		std::vector<CubeAttachment> CubeAttachments(count);
+		for (size_t i = 0; i < CubeAttachments.size(); i++)
+			CubeAttachments[i].Create(format, extent, hasMipmap, sampleCount, otherUsages);
+
+		const int id = m_color_attachment_id++;
+
+		auto [it1, ok1] = mCubeAttachments.emplace(id, std::move(CubeAttachments));
+		if (!ok1) {
+			std::cerr << std::format("[ERROR] ImageManager: Emplace CubeAttachments for '{}' (id={}) failed\n", name, id);
+			return { M_INVALID_ID, {} };
+		}
+
+		auto [it2, ok2] = mCubeAttachmentIDs.emplace(name, id);
+		if (!ok2) {
+			std::cerr << std::format("[WARNING] ImageManager: CubeAttachment '{}' has not been recorded!\n", name);
+			mCubeAttachments.erase(id);
+			return { M_INVALID_ID, {} };
+		}
+
+		auto& vec = it1->second;
+		return { id, std::span<CubeAttachment>(vec.data(), vec.size()) };
+	}
+
+	std::pair<int, std::span<CubeAttachment>> ImageManager::GetCubeAttachments(std::string name)
+	{
+		if (auto it = mCubeAttachmentIDs.find(name); it != mCubeAttachmentIDs.end())
+			return GetCubeAttachments(it->second);
+		std::cerr << std::format("[ERROR] ImageManager: CubeAttachments with name '{}' do not exist!\n", name);
+		return { M_INVALID_ID, {} };
+	}
+
+	std::pair<int, std::span<CubeAttachment>> ImageManager::GetCubeAttachments(int id)
+	{
+		if (auto it = mCubeAttachments.find(id); it != mCubeAttachments.end())
+			return { id, std::span<CubeAttachment>(it->second.data(), it->second.size()) };
+		std::cerr << std::format("[ERROR] ImageManager: CubeAttachments with id {} do not exist!\n", id);
+		return { M_INVALID_ID, {} };
+	}
+
+	int ImageManager::DestroyCubeAttachments(std::string name)
+	{
+		if (auto it = mCubeAttachmentIDs.find(name); it != mCubeAttachmentIDs.end())
+			return DestroyCubeAttachments(it->second);
+		std::cerr << std::format("[WARNING] ImageManager: CubeAttachments with name '{}' do not exist!\n", name);
+		return M_INVALID_ID;
+	}
+
+	int ImageManager::DestroyCubeAttachments(int id)
+	{
+		if (auto it = mCubeAttachments.find(id); it != mCubeAttachments.end()) {
+			it->second.clear();
+			return it->first;
+		}
+		std::cerr << std::format("[WARNING] ImageManager: CubeAttachments with id {} do not exist!\n", id);
+		return M_INVALID_ID;
+	}
+
+	bool ImageManager::HasCubeAttachments(std::string name)
+	{
+		if (auto it = mCubeAttachmentIDs.find(name); it != mCubeAttachmentIDs.end())
+			return HasCubeAttachments(it->second);
+		return false;
+	}
+
+	bool ImageManager::HasCubeAttachments(int id)
+	{
+		return mCubeAttachments.contains(id);
+	}
+
+	size_t ImageManager::GetCubeAttachmentsCount() const
+	{
+		return mCubeAttachments.size();;
+	}
+
 
 }

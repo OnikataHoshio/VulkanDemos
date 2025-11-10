@@ -2,7 +2,7 @@
 #define _TEST_3D_H_
 
 #include "Engine/ShaderEditor/RenderGraph/RenderNode.h"
-#include "Engine/Object/Camera.h"
+#include "Engine/Actor/Camera.h"
 
 namespace HoshioEngine {
 	class Test3D : public RenderNode{

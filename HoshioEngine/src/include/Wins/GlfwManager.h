@@ -3,7 +3,7 @@
 
 #define GLFW_INCLUDE_VULKAN
 #include "Base/VulkanBase.h"
-#include "Engine/Object/Camera.h"
+#include "Engine/Actor/Camera.h"
 #include <GLFW/glfw3.h>
 
 namespace HoshioEngine {

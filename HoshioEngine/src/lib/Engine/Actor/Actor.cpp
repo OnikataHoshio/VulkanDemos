@@ -1,27 +1,27 @@
-#include "Engine/Object/Object.h"
+#include "Engine/Actor/Actor.h"
 
 namespace HoshioEngine {
-	Object::Object(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale)
+	Actor::Actor(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale)
 		:position(position), rotation(rotation), scale(scale)
 	{
 	}
 
-	const glm::vec3& Object::Position() const
+	const glm::vec3& Actor::Position() const
 	{
 		return position;
 	}
 
-	const glm::vec3& Object::Rotation() const
+	const glm::vec3& Actor::Rotation() const
 	{
 		return rotation;
 	}
 
-	const glm::vec3& Object::Scale() const
+	const glm::vec3& Actor::Scale() const
 	{
 		return scale;
 	}
 
-	const glm::mat4x4& Object::ModelTransform() const
+	const glm::mat4x4& Actor::ModelTransform() const
 	{
 		glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), scale);
 		glm::mat4 rotationMatrix = 
@@ -32,17 +32,17 @@ namespace HoshioEngine {
 		return translationMatrix * rotationMatrix * scaleMatrix;
 	}
 
-	void Object::SetPosition(const glm::vec3& position)
+	void Actor::SetPosition(const glm::vec3& position)
 	{
 		this->position = position;
 	}
 
-	void Object::SetRotation(const glm::vec3& rotation)
+	void Actor::SetRotation(const glm::vec3& rotation)
 	{
 		this->rotation = rotation;
 	}
 
-	void Object::SetScale(const glm::vec3& scale)
+	void Actor::SetScale(const glm::vec3& scale)
 	{
 		this->scale = scale;
 	}

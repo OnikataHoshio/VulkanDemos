@@ -46,76 +46,163 @@ namespace HoshioEngine {
 	}
 
 	void VulkanPlus::InitSwapchainRenderPass() {
-		VkAttachmentDescription attachmentDescription = {
+
+		{
+			VkAttachmentDescription attachmentDescription = {
 			.format = VulkanBase::Base().SwapchainCi().imageFormat,
 			.samples = VK_SAMPLE_COUNT_1_BIT,
 			.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
 			.storeOp = VK_ATTACHMENT_STORE_OP_STORE,
 			.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
 			.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
-		};
+			};
 
-		VkAttachmentReference attachmentReference = {
-			.attachment = 0,
-			.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
-		};
+			VkAttachmentReference attachmentReference = {
+				.attachment = 0,
+				.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
+			};
 
 
-		VkSubpassDescription subpassDescription = {
-			.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
-			.colorAttachmentCount = 1,
-			.pColorAttachments =&attachmentReference,
-		};
-		VkSubpassDependency subpassDependency = {
-			.srcSubpass = VK_SUBPASS_EXTERNAL,
-			.dstSubpass = 0,
-			.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-			.dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-			.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-			.dstAccessMask = VK_ACCESS_SHADER_READ_BIT
-		};
+			VkSubpassDescription subpassDescription = {
+				.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
+				.colorAttachmentCount = 1,
+				.pColorAttachments = &attachmentReference,
+			};
+			VkSubpassDependency subpassDependency = {
+				.srcSubpass = VK_SUBPASS_EXTERNAL,
+				.dstSubpass = 0,
+				.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+				.dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+				.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+				.dstAccessMask = VK_ACCESS_SHADER_READ_BIT
+			};
 
-		VkRenderPassCreateInfo renderPassCreateInfo = {
-			.attachmentCount = 1,
-			.pAttachments = &attachmentDescription,
-			.subpassCount = 1,
-			.pSubpasses = &subpassDescription,
-			.dependencyCount = 1,
-			.pDependencies = &subpassDependency
-		};
-		swapchainRenderPass.Create(renderPassCreateInfo);
+			VkRenderPassCreateInfo renderPassCreateInfo = {
+				.attachmentCount = 1,
+				.pAttachments = &attachmentDescription,
+				.subpassCount = 1,
+				.pSubpasses = &subpassDescription,
+				.dependencyCount = 1,
+				.pDependencies = &subpassDependency
+			};
+			swapchainRenderPass.Create(renderPassCreateInfo);
+		}
+		
+		{
+			VkAttachmentDescription attachmentDescriptions[2] = {
+				{
+					.format = VulkanBase::Base().SwapchainCi().imageFormat,
+					.samples = VK_SAMPLE_COUNT_1_BIT,
+					.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
+					.storeOp = VK_ATTACHMENT_STORE_OP_STORE,
+					.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+					.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
+				},
+				{
+					.format = VK_FORMAT_D24_UNORM_S8_UINT,
+					.samples = VK_SAMPLE_COUNT_1_BIT,
+					.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
+					.storeOp = VK_ATTACHMENT_STORE_OP_STORE,
+					.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
+					.stencilStoreOp = VK_ATTACHMENT_STORE_OP_STORE,
+					.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+					.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
+				}
+			};
+
+			VkAttachmentReference attachmentReferences[2] = {
+				{
+					.attachment = 0,
+					.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
+				},
+				{
+					.attachment = 1,
+					.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
+				}
+			};
+
+			VkSubpassDescription subpassDescription = {
+				.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
+				.colorAttachmentCount = 1,
+				.pColorAttachments = attachmentReferences,
+				.pDepthStencilAttachment = attachmentReferences + 1
+			};
+
+			VkSubpassDependency subpassDependency = {
+				.srcSubpass = VK_SUBPASS_EXTERNAL,
+				.dstSubpass = 0,
+				.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+				.dstStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
+				.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+				.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
+				.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT
+			};
+
+			VkRenderPassCreateInfo renderPassCreateInfo = {
+				.attachmentCount = 2,
+				.pAttachments = attachmentDescriptions,
+				.subpassCount = 1,
+				.pSubpasses = &subpassDescription,
+				.dependencyCount = 1,
+				.pDependencies = &subpassDependency
+			};
+			
+			swapchainRenderPassWithDepthStencil.Create(renderPassCreateInfo);
+		}
 	}
 
 	void VulkanPlus::InitSwapchainFramebuffers()
 	{
 		InitSwapchainRenderPass();
 		auto Create = [&] {
-			swapchainFramebuffers.resize(VulkanBase::Base().SwapchainImageCount());
-			//swapchainDsAttachments.resize(VulkanBase::Base().SwapchainImageCount());
-			//for (auto& dsAttachment : swapchainDsAttachments)
-			//	dsAttachment.Create(depthStencilFormat, VulkanBase::Base().SwapchainCi().imageExtent,
-			//		false, 1, VK_SAMPLE_COUNT_1_BIT, VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT);
-			VkFramebufferCreateInfo framebufferCreateInfo = {
-				.renderPass = swapchainRenderPass,
-				.attachmentCount = 1,
-				.width = VulkanBase::Base().SwapchainCi().imageExtent.width,
-				.height = VulkanBase::Base().SwapchainCi().imageExtent.height,
-				.layers = 1
-			};
-			for (uint32_t i = 0; i < VulkanBase::Base().SwapchainImageCount(); i++) {
-				VkImageView attachment = VulkanBase::Base().SwapchainImageView(i);
-				//VkImageView attachments[2] = {
-				//	VulkanBase::Base().SwapchainImageView(i),
-				//	swapchainDsAttachments[i].ImageView()
-				//};
-				framebufferCreateInfo.pAttachments = &attachment;
-				swapchainFramebuffers[i].Create(framebufferCreateInfo);
+			{
+				swapchainFramebuffers.resize(VulkanBase::Base().SwapchainImageCount());
+				VkFramebufferCreateInfo framebufferCreateInfo = {
+					.renderPass = swapchainRenderPass,
+					.attachmentCount = 1,
+					.width = VulkanBase::Base().SwapchainCi().imageExtent.width,
+					.height = VulkanBase::Base().SwapchainCi().imageExtent.height,
+					.layers = 1
+				};
+				for (uint32_t i = 0; i < VulkanBase::Base().SwapchainImageCount(); i++) {
+					VkImageView attachment = VulkanBase::Base().SwapchainImageView(i);
+					framebufferCreateInfo.pAttachments = &attachment;
+					swapchainFramebuffers[i].Create(framebufferCreateInfo);
+				}
 			}
+			
+			{
+				swapchainFramebuffersWithDepthStencil.resize(VulkanBase::Base().SwapchainImageCount());
+				swapchainDepthStencilAttachments.resize(VulkanBase::Base().SwapchainImageCount());
+				for (auto& dsAttachment : swapchainDepthStencilAttachments)
+					dsAttachment.Create(VK_FORMAT_D24_UNORM_S8_UINT, VulkanBase::Base().SwapchainCi().imageExtent,
+						false, 1, VK_SAMPLE_COUNT_1_BIT, VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT);
+				VkFramebufferCreateInfo framebufferCreateInfo = {
+					.renderPass = swapchainRenderPassWithDepthStencil,
+					.attachmentCount = 2,
+					.width = VulkanBase::Base().SwapchainExtent().width,
+					.height = VulkanBase::Base().SwapchainExtent().height,
+					.layers = 1
+				};
+				std::vector<VkImageView> attachments(2);
+				for (uint32_t i = 0; i < VulkanBase::Base().SwapchainImageCount(); i++) {
+					attachments[0] = VulkanBase::Base().SwapchainImageView(i);
+					attachments[1] = swapchainDepthStencilAttachments[i].ImageView();
+					framebufferCreateInfo.pAttachments = attachments.data();
+					swapchainFramebuffersWithDepthStencil[i].Create(framebufferCreateInfo);
+				}
+			}
+
+
 			};
 
 		auto Destroy = [&] {
 			if (!swapchainFramebuffers.empty())
 				swapchainFramebuffers.clear();
+			if (!swapchainFramebuffersWithDepthStencil.empty())
+				swapchainFramebuffersWithDepthStencil.clear();
+			if (!swapchainDepthStencilAttachments.empty())
+				swapchainDepthStencilAttachments.clear();
 			};
 
 		Create();
@@ -166,13 +253,26 @@ namespace HoshioEngine {
 	{
 		return swapchainFramebuffers[VulkanBase::Base().CurrentImageIndex()];
 	}
-	const Framebuffer& VulkanPlus::SwapchainFramebuffer() const
+	const Framebuffer& VulkanPlus::CurrentSwapchainFramebufferWithDepthStencil() const
 	{
-		return swapchainFramebuffers[VulkanBase::Base().CurrentImageIndex()];
+		return swapchainFramebuffersWithDepthStencil[VulkanBase::Base().CurrentImageIndex()];
+	}
+	const std::vector<Framebuffer>& VulkanPlus::SwapchainFramebuffers() const
+	{
+		return swapchainFramebuffers;
+	}
+	const std::vector<Framebuffer>& VulkanPlus::SwapchainFramebuffersWithDepthStencil() const
+	{
+		return swapchainFramebuffersWithDepthStencil;
 	}
 	const RenderPass& VulkanPlus::SwapchainRenderPass() const
 	{
 		return swapchainRenderPass;
+	}
+
+	const RenderPass& VulkanPlus::SwapchainRenderPassWithDepthStencil() const
+	{
+		return swapchainRenderPassWithDepthStencil;
 	}
 
 	void VulkanPlus::ExecuteCommandBuffer_Graphics(VkCommandBuffer commandBuffer) const
@@ -219,6 +319,96 @@ namespace HoshioEngine {
 	size_t VulkanPlus::GetTextureCount() const
 	{
 		return image_manager.GetTexture2DCount();
+	}
+
+	std::pair<int, std::span<TextureArray>> VulkanPlus::CreateTextureArray(std::string name, const char* filepath, VkExtent2D extentInTiles, VkFormat format_initial, VkFormat format_final, bool generateMipmap)
+	{
+		return image_manager.CreateTextureArray(std::move(name), filepath, extentInTiles, format_initial, format_final, generateMipmap);
+	}
+
+	std::pair<int, std::span<TextureArray>> VulkanPlus::CreateTextureArray(std::string name, const uint8_t* pImageData, VkExtent2D fullExtent, VkExtent2D extentInTiles, VkFormat format_initial, VkFormat format_final, bool generateMipmap)
+	{
+		return image_manager.CreateTextureArray(std::move(name), pImageData, fullExtent, extentInTiles, format_initial, format_final, generateMipmap);
+	}
+
+	std::pair<int, std::span<TextureArray>> VulkanPlus::CreateTextureArray(std::string name, ArrayRef<const char* const> filepaths, VkFormat format_initial, VkFormat format_final, bool generateMipmap)
+	{
+		return image_manager.CreateTextureArray(std::move(name), filepaths, format_initial, format_final, generateMipmap);
+	}
+
+	std::pair<int, std::span<TextureArray>> VulkanPlus::CreateTextureArray(std::string name, ArrayRef<const uint8_t* const> psImageData, VkExtent2D extent, VkFormat format_initial, VkFormat format_final, bool generateMipmap)
+	{
+		return image_manager.CreateTextureArray(std::move(name), psImageData, extent, format_initial, format_final, generateMipmap);
+	}
+
+	std::pair<int, std::span<TextureArray>> VulkanPlus::GetTextureArray(std::string name)
+	{
+		return image_manager.GetTextureArray(std::move(name));
+	}
+
+	std::pair<int, std::span<TextureArray>> VulkanPlus::GetTextureArray(int id)
+	{
+		return image_manager.GetTextureArray(id);
+	}
+
+	bool VulkanPlus::HasTextureArray(std::string name)
+	{
+		return image_manager.HasTextureArray(std::move(name));
+	}
+
+	bool VulkanPlus::HasTextureArray(int id)
+	{
+		return image_manager.HasTextureArray(id);
+	}
+
+	size_t VulkanPlus::GetTextureArrayCount() const
+	{
+		return image_manager.GetTextureArrayCount();
+	}
+
+	std::pair<int, std::span<TextureCube>> VulkanPlus::CreateTextureCube(std::string name, const char* filepath, const glm::uvec2 facePositions[6], VkFormat format_initial, VkFormat format_final, bool lookFromOutside, bool generateMipmap)
+	{
+		return image_manager.CreateTextureCube(std::move(name), filepath, facePositions, format_initial, format_final, lookFromOutside, generateMipmap);
+	}
+
+	std::pair<int, std::span<TextureCube>> VulkanPlus::CreateTextureCube(std::string name, const uint8_t* pImageData, VkExtent2D fullExtent, const glm::uvec2 facePositions[6], VkFormat format_initial, VkFormat format_final, bool lookFromOutside, bool generateMipmap)
+	{
+		return image_manager.CreateTextureCube(std::move(name), pImageData, fullExtent, facePositions, format_initial, format_final, lookFromOutside, generateMipmap);
+	}
+
+	std::pair<int, std::span<TextureCube>> VulkanPlus::CreateTextureCube(std::string name, const char* const* filepaths, VkFormat format_initial, VkFormat format_final, bool lookFromOutside, bool generateMipmap)
+	{
+		return image_manager.CreateTextureCube(std::move(name), filepaths, format_initial, format_final, lookFromOutside, generateMipmap);
+	}
+
+	std::pair<int, std::span<TextureCube>> VulkanPlus::CreateTextureCube(std::string name, const uint8_t* const* psImageData, VkExtent2D extent, VkFormat format_initial, VkFormat format_final, bool lookFromOutside, bool generateMipmap)
+	{
+		return image_manager.CreateTextureCube(std::move(name), psImageData, extent, format_initial, format_final, lookFromOutside, generateMipmap);
+	}
+
+	std::pair<int, std::span<TextureCube>> VulkanPlus::GetTextureCube(std::string name)
+	{
+		return image_manager.GetTextureCube(std::move(name));
+	}
+
+	std::pair<int, std::span<TextureCube>> VulkanPlus::GetTextureCube(int id)
+	{
+		return image_manager.GetTextureCube(id);
+	}
+
+	bool VulkanPlus::HasTextureCube(std::string name)
+	{
+		return image_manager.HasTextureCube(std::move(name));
+	}
+
+	bool VulkanPlus::HasTextureCube(int id)
+	{
+		return image_manager.HasTextureCube(id);
+	}
+
+	size_t VulkanPlus::GetTextureCubeCount() const
+	{
+		return image_manager.GetTextureCubeCount();
 	}
 
 	std::pair<int, std::span<ColorAttachment>> VulkanPlus::CreateColorAttachments(std::string name, uint32_t count, VkFormat format, VkExtent2D extent, bool hasMipmap, uint32_t layerCount, VkSampleCountFlagBits sampleCount, VkImageUsageFlags otherUsages)
@@ -295,6 +485,46 @@ namespace HoshioEngine {
 	size_t VulkanPlus::GetDepthStencilAttachmentsCount() const
 	{
 		return image_manager.GetDepthStencilAttachmentsCount();
+	}
+
+	std::pair<int, std::span<CubeAttachment>> VulkanPlus::CreateCubeAttachments(std::string name, uint32_t count, VkFormat format, VkExtent2D extent, bool hasMipmap, VkSampleCountFlagBits sampleCount, VkImageUsageFlags otherUsages)
+	{
+		return image_manager.CreateCubeAttachments(std::move(name), count, format, extent, hasMipmap, sampleCount, otherUsages);
+	}
+
+	std::pair<int, std::span<CubeAttachment>> VulkanPlus::GetCubeAttachments(std::string name)
+	{
+		return image_manager.GetCubeAttachments(std::move(name));
+	}
+
+	std::pair<int, std::span<CubeAttachment>> VulkanPlus::GetCubeAttachments(int id)
+	{
+		return image_manager.GetCubeAttachments(id);
+	}
+
+	int VulkanPlus::DestroyCubeAttachments(std::string name)
+	{
+		return image_manager.DestroyCubeAttachments(std::move(name));
+	}
+
+	int VulkanPlus::DestroyCubeAttachments(int id)
+	{
+		return image_manager.DestroyCubeAttachments(id);
+	}
+
+	bool VulkanPlus::HasCubeAttachments(std::string name)
+	{
+		return image_manager.HasCubeAttachments(std::move(name));
+	}
+
+	bool VulkanPlus::HasCubeAttachments(int id)
+	{
+		return image_manager.HasCubeAttachments(id);
+	}
+
+	size_t VulkanPlus::GetCubeAttachmentsCount() const
+	{
+		return image_manager.GetCubeAttachmentsCount();
 	}
 
 	std::pair<int, std::span<Framebuffer>> VulkanPlus::CreateFramebuffers(std::string name, uint32_t count, std::vector<VkFramebufferCreateInfo>& createInfos) {

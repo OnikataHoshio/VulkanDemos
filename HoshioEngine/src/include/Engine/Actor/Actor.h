@@ -5,7 +5,7 @@
 
 namespace HoshioEngine {
 	
-	class Object {
+	class Actor {
 	protected:
 		glm::vec3 position = glm::vec3(0.0f);
 		glm::vec3 rotation = glm::vec3(0.0f);
@@ -14,9 +14,9 @@ namespace HoshioEngine {
 		glm::mat4x4 transform = glm::mat4x4(1.0f);
 
 	public:
-		Object(glm::vec3 position = glm::vec3(0.0f), glm::vec3 rotation = glm::vec3(0.0f),
+		Actor(glm::vec3 position = glm::vec3(0.0f), glm::vec3 rotation = glm::vec3(0.0f),
 			glm::vec3 scale = glm::vec3(1.0f));
-		virtual ~Object() = default;
+		virtual ~Actor() = default;
 
 		//const 
 		const glm::vec3& Position() const;

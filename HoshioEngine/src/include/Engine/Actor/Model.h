@@ -2,7 +2,7 @@
 #define _MODEL_H_
 
 #include "Mesh.h"
-#include "Object.h"
+#include "Actor.h"
 
 namespace HoshioEngine {
 	enum class MODEL_IMPORT_TYPE {
@@ -10,7 +10,7 @@ namespace HoshioEngine {
 		MODLE_TYPE_ERR
 	};
 
-	class Model : public Object {
+	class Model : public Actor {
 	public:
 		Model() = default;
 		Model(const char* file_path);

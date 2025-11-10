@@ -2,7 +2,7 @@
 #define _TEST_MODEL_H_
 
 #include "Engine/ShaderEditor/RenderGraph/RenderNode.h"
-#include "Engine/Object/Model.h"
+#include "Engine/Actor/Model.h"
 
 namespace HoshioEngine {
 	class TestModel : public RenderNode {
